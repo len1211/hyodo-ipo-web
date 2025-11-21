@@ -72,7 +72,7 @@ export default function RootLayout({
     <html lang="ko">
       <head>
         {/* 네이버 서치어드바이저 소유권 확인 태그 (필요 시 주석 해제하고 값 입력) */}
-        {/* <meta name="naver-site-verification" content="여기에_네이버_값_입력" /> */}
+        <meta name="naver-site-verification" content="dd50cb6de3000b5feb2b795627ab179cc8ff8ac9" />
         
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
