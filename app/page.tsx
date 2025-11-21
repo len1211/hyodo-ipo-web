@@ -4,12 +4,13 @@
 import { useEffect, useState } from 'react'
 import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore'
 import { db } from './firebase' // 👈 Firebase 설정 파일
+import Link from 'next/link'
 
 // 2. shadcn/ui 컴포넌트 (승환님이 가져오신 코드)
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Sparkles, Calendar, Users, TrendingUp, Building, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
+import { Sparkles, Calendar, Users, TrendingUp, Building, AlertCircle, CheckCircle, XCircle, BookOpen, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 // 3. (중요!) Java DB의 필드명 정의 (이거에 맞춰서 가져옴)
@@ -299,10 +300,33 @@ export default function SubscriptionPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
+
+        {/* 1. 헤더 */}
         <header className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-balance">효도 청약</h1>
         </header>
 
+        {/* ⭐ [추가] 가이드 페이지 이동 배너 (여기가 명당입니다!) ⭐ */}
+        <Link href="/guide">
+          <div className="mb-6 bg-white border border-blue-100 rounded-xl p-4 shadow-sm flex items-center justify-between hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 p-2 rounded-full group-hover:bg-blue-200 transition-colors">
+                <BookOpen className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-800 text-sm sm:text-base">
+                  공모주가 처음이신가요?
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  초보자를 위한 투자 가이드 보러가기
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          </div>
+        </Link>
+        
+        {/* 2. 기존 정보 박스 (파란색 그라데이션) */}
         <div className="mb-8 sm:mb-10 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 sm:p-6 border border-blue-100">
           <div className="flex items-start gap-3">
             <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0 mt-1" />
