@@ -74,6 +74,8 @@ export default function RootLayout({
       <head>
         {/* 네이버 서치어드바이저 소유권 확인 태그 (필요 시 주석 해제하고 값 입력) */}
         <meta name="naver-site-verification" content="dd50cb6de3000b5feb2b795627ab179cc8ff8ac9" />
+        {/* 구글 애드센스 계정 태그 */}
+        <meta name="google-adsense-account" content="ca-pub-9693441631837902" />
         
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
