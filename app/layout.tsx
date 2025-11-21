@@ -5,6 +5,8 @@ import Script from 'next/script'
 import './globals.css'
 import Footer from '@/components/footer' 
 
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
+
 // 폰트 설정 (변수명 사용을 위해 수정)
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -97,6 +99,12 @@ export default function RootLayout({
         
         {/* 👇 [추가] 푸터 컴포넌트 삽입 */}
         <Footer /> 
+
+        {/* 👇 2. 구글 애널리틱스 (기존 유지) */}
+        <GoogleAnalytics gaId="G-KSMPQWSX14" />
+        
+
+
       </body>
     </html>
   )
