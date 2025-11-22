@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
@@ -17,6 +17,15 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// ⭐ [추가됨] 뷰포트 설정 (앱처럼 보이게 함) ⭐
+export const viewport: Viewport = {
+  themeColor: "#2563eb", // 파란색 (브라우저 상단바 색상)
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // 확대 금지 (앱 느낌)
+}
 
 // ⭐ 여기가 SEO 핵심 수정 부분입니다! ⭐
 export const metadata: Metadata = {
