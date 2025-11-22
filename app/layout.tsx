@@ -64,6 +64,9 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
+
+  // 7. 매니페스트 (PWA 설정)
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({

@@ -3,7 +3,7 @@ import GuideContent from '@/components/GuideContent' // 👈 아까 만든 알�
 
 // ⭐ 가이드 페이지 전용 SEO 설정 (서버 컴포넌트라 가능!)
 export const metadata: Metadata = {
-  title: '공모주 투자 가이드', // 브라우저 탭에 "공모주 투자 가이드 | 효도 청약" 으로 뜸
+  title: '노인도 쉬운 공모주 청약 방법 및 균등배정 꿀팁', // 브라우저 탭에 "공모주 투자 가이드 | 효도 청약" 으로 뜸
   description: '초보자도 3분이면 이해하는 공모주 투자 필승 전략과 필수 용어 정리. 비례배정, 균등배정, 따상, 증거금 계산법을 쉽게 알려드립니다.',
   openGraph: {
     title: '공모주 투자 가이드 - 실패 없는 투자의 시작',
