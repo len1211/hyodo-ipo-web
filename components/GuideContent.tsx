@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { 
-  BookOpen, ChevronDown, ChevronUp, Coins, Clock, BarChart3, AlertTriangle, Home, CheckCircle2
+  BookOpen, ChevronDown, ChevronUp, Coins, Clock, BarChart3, AlertTriangle, Home, CheckCircle2, Calculator, CreditCard, Users
 } from 'lucide-react'
 
 
@@ -164,7 +164,101 @@ const guideContents = [
           주의: 마이너스 통장을 써서 청약할 경우, 환불일까지의 이자를 꼭 계산해봐야 합니다!
         </p>
       `
-    }
+    },
+    // ⭐ [추가됨] 6. 마이너스 통장 계산
+  {
+    id: 6,
+    icon: <Calculator className="h-6 w-6 text-indigo-600" />,
+    title: "6. 마이너스 통장(영끌) 투자, 이득일까?",
+    summary: "대출 이자보다 수익이 더 클까? 실질 수익률 계산법",
+    content: `
+      <div class="space-y-4">
+        <h3 class="text-lg font-bold text-gray-800">무조건 남는 장사일까요?</h3>
+        <p class="text-gray-700">
+          비례배정을 노리고 1억 원을 마이너스 통장(금리 5%)으로 빌려서 2일간 쓴다고 가정해봅시다.
+        </p>
+        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-2">
+          <div class="flex justify-between text-sm">
+            <span>대출 이자 (2일치)</span>
+            <span class="font-bold text-red-600">약 -27,000원</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span>청약 수수료</span>
+            <span class="font-bold text-red-600">-2,000원</span>
+          </div>
+          <div class="border-t border-indigo-200 pt-2 mt-2 flex justify-between font-bold">
+            <span>총 비용</span>
+            <span>약 29,000원</span>
+          </div>
+        </div>
+        <p class="text-gray-700 text-sm">
+          즉, 배정받은 주식으로 <strong>최소 3만 원 이상의 수익</strong>을 내야 본전입니다. 
+          경쟁률이 너무 높아서 1주밖에 못 받았다면, 따상을 가더라도 이자 내고 나면 남는 게 없을 수 있습니다. 
+          <strong>'파킹통장 이자'와 '대출 이자'를 꼭 비교</strong>하고 신중하게 결정하세요.
+        </p>
+      </div>
+    `
+  },
+  // ⭐ [추가됨] 7. 20일 제한 회피
+  {
+    id: 7,
+    icon: <CreditCard className="h-6 w-6 text-orange-600" />,
+    title: "7. '20일 계좌 개설 제한' 피하는 꿀팁",
+    summary: "계좌를 못 만들어서 청약을 못 한다면? 우회 방법!",
+    content: `
+      <div class="space-y-4">
+        <div class="bg-orange-50 p-4 rounded-xl border border-orange-100">
+          <h4 class="font-bold text-orange-800 mb-2">🚫 20일 제한이란?</h4>
+          <p class="text-sm text-orange-700">
+            대포통장 근절을 위해, 전 금융권 통틀어 <strong>영업일 기준 20일(약 한 달)</strong> 내에 
+            새로운 입출금 통장을 1개만 만들 수 있게 한 제도입니다.
+          </p>
+        </div>
+        <h4 class="font-bold text-gray-900 mt-2">💡 해결 방법 (우회로)</h4>
+        <ul class="list-disc list-inside space-y-2 text-gray-700 text-sm">
+          <li>
+            <strong>카카오뱅크/신한쏠 연계 개설:</strong> 
+            카카오뱅크 앱 내에서 '증권사 주식계좌 개설' 메뉴를 이용하면 20일 제한 없이 여러 증권사를 한 번에 만들 수 있는 경우가 많습니다.
+          </li>
+          <li>
+            <strong>20일 제한 없는 증권사:</strong> 
+            삼성증권, 키움증권, 한화투자증권 등 일부 증권사는 비대면 개설 시 제한을 두지 않기도 합니다. (정책은 수시로 변동되니 확인 필요)
+          </li>
+          <li>
+            <strong>미리미리 만들기:</strong> 
+            가장 좋은 방법은 공모주 일정이 뜨기 전에 주요 증권사(KB, 한투, 미래, NH 등) 계좌를 미리 만들어두는 것입니다.
+          </li>
+        </ul>
+      </div>
+    `
+  },
+  // ⭐ [추가됨] 8. 가족 계좌 활용
+  {
+    id: 8,
+    icon: <Users className="h-6 w-6 text-pink-600" />,
+    title: "8. 가족 계좌 활용하기 (대리 청약)",
+    summary: "온 가족 총출동! 합법적인 가족 투자 방법",
+    content: `
+      <div class="space-y-4">
+        <p class="text-gray-700">
+          균등배정은 '계좌 수'가 깡패입니다. 나 혼자 1주 받는 것보다, 4인 가족이 모두 청약해서 4주를 받는 게 훨씬 이득이죠.
+        </p>
+        <h4 class="font-bold text-gray-900">👨‍👩‍👧‍👦 가족 계좌 준비물</h4>
+        <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+          <li>본인 신분증 + 가족 신분증 (또는 가족관계증명서)</li>
+          <li>각자의 명의로 된 스마트폰 (인증용)</li>
+          <li>미성년자 자녀: 법정대리인(부모)이 영업점 방문 또는 비대면(일부 증권사)으로 개설 가능</li>
+        </ul>
+        <div class="bg-pink-50 p-4 rounded-xl border border-pink-100 mt-2">
+          <strong class="text-pink-800">⚠️ 주의사항 (증여세 이슈)</strong>
+          <p class="text-sm text-pink-700 mt-1">
+            가족 계좌로 돈을 보냈다가 원금+수익을 다시 내 계좌로 가져올 때, 금액이 크면 '증여'로 오해받을 수 있습니다. 
+            <strong>'차용증'</strong>을 쓰거나, <strong>가족 명의 통장에 수익금을 남겨두는 것</strong>이 안전합니다.
+          </p>
+        </div>
+      </div>
+    `
+  }
   ]
   // 함수 이름을 GuidePage -> GuideContent로 변경
   export default function GuideContent() {
