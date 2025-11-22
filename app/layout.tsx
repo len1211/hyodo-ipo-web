@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import './globals.css'
@@ -8,15 +8,8 @@ import Footer from '@/components/footer'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 
 // 폰트 설정 (변수명 사용을 위해 수정)
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// 👇 [수정] 폰트 설정 변경
+const inter = Inter({ subsets: ["latin"] });
 
 // ⭐ [추가됨] 뷰포트 설정 (앱처럼 보이게 함) ⭐
 export const viewport: Viewport = {
@@ -97,7 +90,7 @@ export default function RootLayout({
       </head>
 
       {/* 👇 [수정] flex-col 클래스를 추가해서 푸터를 바닥에 고정시킵니다 */}
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex flex-col min-h-screen`}>
+      <body className={`${inter.className} font-sans antialiased flex flex-col min-h-screen`}>
         
         {/* 👇 [수정] 메인 콘텐츠가 남은 공간을 꽉 채우도록 설정 (flex-grow) */}
         <div className="flex-grow">
