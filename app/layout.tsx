@@ -66,12 +66,9 @@ export const metadata: Metadata = {
 
   // 6. 아이콘 (기존 유지)
   icons: {
-    icon: [
-      { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },
-      { url: '/icon-dark-32x32.png', media: '(prefers-color-scheme: dark)' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/icon-192x192.png', // 브라우저 탭 아이콘
+    shortcut: '/icon-192x192.png',
+    apple: '/icon-192x192.png', // 아이폰 홈 화면 아이콘
   },
 
   // 7. 매니페스트 (PWA 설정)
