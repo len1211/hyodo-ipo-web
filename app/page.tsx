@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Sparkles, Calendar, Users, TrendingUp, Building, AlertCircle, CheckCircle, XCircle, BookOpen, ChevronRight } from 'lucide-react'
+import { Sparkles, Calendar, Users, TrendingUp, Building, AlertCircle, CheckCircle, XCircle, BookOpen, ChevronRight, RefreshCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 // 👇 아까 만든 캐시 도구 가져오기 (파일이 있어야 합니다!)
@@ -117,6 +117,17 @@ const sortSubscriptionsBySchedule = (items: Subscription[]) =>
     }
     return aDate - bDate
   })
+
+// 캐시 삭제 및 새로고침 함수
+const handleRefresh = () => {
+  // 1. 저장된 캐시 삭제 (storage 도구 사용)
+  storage.remove('ipo_home_data');
+  storage.remove('ipo_raw_cache');
+  storage.remove('ipo_data_timestamp');
+
+  // 2. 페이지 새로고침 (그러면 다시 DB에서 긁어옴)
+  window.location.reload();
+};
 
 
 // ---
@@ -344,6 +355,16 @@ export default function SubscriptionPage() {
         {/* 1. 헤더 */}
         <header className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-balance">효도 청약</h1>
+          {/* ⭐ [추가] 새로고침 버튼 (우측 상단 배치) */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0 text-gray-400 hover:text-blue-600"
+            onClick={handleRefresh}
+            title="최신 데이터로 새로고침"
+          >
+            <RefreshCw className="h-5 w-5" />
+          </Button>
         </header>
 
         {/* ⭐ [추가] 가이드 페이지 이동 배너 (여기가 명당입니다!) ⭐ */}
