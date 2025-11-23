@@ -13,8 +13,11 @@ import { Badge } from '@/components/ui/badge'
 import { Sparkles, Calendar, Users, TrendingUp, Building, AlertCircle, CheckCircle, XCircle, BookOpen, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+// 👇 아까 만든 캐시 도구 가져오기 (파일이 있어야 합니다!)
+import { storage } from '@/utils/storage'
+
 // 3. (중요!) Java DB의 필드명 정의 (이거에 맞춰서 가져옴)
-type FirebaseIPO = {
+export type FirebaseIPO = {
   stockName: string;
   schedule: string;
   price: string;
@@ -25,6 +28,8 @@ type FirebaseIPO = {
   reason?: string; // AI가 요약한 추천 사유
   category?: string; // 상세 크롤링한 업종
   lockupRate?: string; // 상세 크롤링한 의무보유확약
+  retailCompetition?: string;
+  listingDate?: string;
 }
 
 // 4. (중요!) 디자인에 필요한 데이터 타입 (승환님이 가져오신 코드)
@@ -52,7 +57,7 @@ const getIpoStatus = (schedule: string): { status: 'now' | 'upcoming' | 'finishe
 
     const parts = schedule.split("~");
     const startDateStr = parts[0].trim();
-    
+
     const parseDatePart = (partStr: string, baseYear: number, baseMonth: number): Date => {
       const p = partStr.split(".").map(Number);
       if (p.length === 3) return new Date(p[0], p[1] - 1, p[2]); // 2025.11.18
@@ -64,7 +69,7 @@ const getIpoStatus = (schedule: string): { status: 'now' | 'upcoming' | 'finishe
     const startParts = startDateStr.split(".").map(Number);
     if (startParts.length < 3) return { status: 'finished', startDate: new Date(0) }; // 잘못된 형식
     const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-    
+
     let endDate = new Date(startDate);
     if (parts.length > 1) {
       const endDateStr = parts[1].trim();
@@ -145,9 +150,31 @@ export default function SubscriptionPage() {
   useEffect(() => {
     const fetchIpos = async () => {
       try {
+        // 캐시 키 정의
+        const CACHE_KEY = 'ipo_home_data';       // 화면에 보여줄 리스트용
+        const RAW_CACHE_KEY = 'ipo_raw_cache';   // 상세 페이지에 넘겨줄 원본 데이터용
+
+        // 1. 캐시 확인 로직 (storage 유틸리티 사용)
+        // store.get 내부에서 시간 체크까지 다 해줍니다.
+        const cachedHome = storage.get<{ now: Subscription[], upcoming: Subscription[] }>(CACHE_KEY);
+
+        if (cachedHome) {
+          console.log("✅ 메인페이지: 캐시 데이터 사용 (비용 0원)");
+          setNowIpos(cachedHome.now);
+          setUpcomingIpos(cachedHome.upcoming);
+          setIsLoading(false);
+          return; // 🚨 여기서 함수 종료! (DB 요청 안 함)
+        }
+
+        // 캐시가 없으면 DB 요청 시작
+        console.log("🔥 메인페이지: DB 요청 발생 (비용 발생)");
+
         const snapshot = await getDocs(collection(db, 'ipo_list'))
         const nowList: Subscription[] = []
         const upcomingList: Subscription[] = []
+
+        // 원본 데이터를 담을 배열 (상세페이지 공유용)
+        const rawDataList: FirebaseIPO[] = [];
 
         // (수정!) 14일 필터링을 위한 기준 날짜
         const today = new Date();
@@ -156,6 +183,10 @@ export default function SubscriptionPage() {
 
         snapshot.docs.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
           const data = doc.data() as FirebaseIPO
+
+          // 원본 데이터 수집 (상세 페이지 공유용)
+          rawDataList.push(data);
+
           const statusInfo = getStatusFromRecommendState(data.recommendState)
 
           const ipo: Subscription = {
@@ -170,12 +201,12 @@ export default function SubscriptionPage() {
             price: data.price ? `${data.price.replace(' (예정)', '')}원` : '미정',
             description: data.reason || `기관 경쟁률 ${data.competitionRate || '미정'}. ${data.underwriter || ''} 주관.`,
           }
-          
+
           if (!data.schedule) return; // 날짜 정보 없으면 무시
 
           // (수정!) 헬퍼 함수에서 status와 startDate를 모두 받아옴
           const { status, startDate } = getIpoStatus(data.schedule)
-          
+
           if (status === 'now') {
             ipo.badge = '지금 청약 가능'
             nowList.push(ipo)
@@ -188,8 +219,17 @@ export default function SubscriptionPage() {
           }
         })
 
-        setNowIpos(sortSubscriptionsBySchedule(nowList))
-        setUpcomingIpos(sortSubscriptionsBySchedule(upcomingList))
+        const sortedNow = sortSubscriptionsBySchedule(nowList);
+        const sortedUpcoming = sortSubscriptionsBySchedule(upcomingList);
+
+        setNowIpos(sortedNow);
+        setUpcomingIpos(sortedUpcoming);
+
+        // 데이터를 다 만들었으니 캐시에 저장 (다음 접속을 위해)
+        // 1. 화면 데이터 저장
+        storage.set(CACHE_KEY, { now: sortedNow, upcoming: sortedUpcoming });
+        // 2. 원본 데이터 저장 (상세 페이지에서 갖다 씀)
+        storage.set(RAW_CACHE_KEY, rawDataList);
       } catch (error) {
         console.error('Failed to load IPO list:', error)
       } finally {
@@ -325,7 +365,7 @@ export default function SubscriptionPage() {
             <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
           </div>
         </Link>
-        
+
         {/* 2. 기존 정보 박스 (파란색 그라데이션) */}
         <div className="mb-8 sm:mb-10 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 sm:p-6 border border-blue-100">
           <div className="flex items-start gap-3">
@@ -344,14 +384,14 @@ export default function SubscriptionPage() {
             <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
             <h2 className="text-xl sm:text-2xl font-bold text-balance">지금 청약 가능</h2>
             <Badge variant="secondary" className="text-sm px-2.5 py-0.5">
-              {nowIpos.length}개 
+              {nowIpos.length}개
             </Badge>
           </div>
           <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
             {nowIpos.length === 0 ? (
-               <p className="text-gray-500 col-span-2">현재 청약 가능한 종목이 없습니다.</p>
+              <p className="text-gray-500 col-span-2">현재 청약 가능한 종목이 없습니다.</p>
             ) : (
-               nowIpos.map((subscription) => (
+              nowIpos.map((subscription) => (
                 <SubscriptionCard key={subscription.id} subscription={subscription} />
               ))
             )}
@@ -368,8 +408,8 @@ export default function SubscriptionPage() {
             </Badge>
           </div>
           <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
-             {upcomingIpos.length === 0 ? (
-               <p className="text-gray-500 col-span-2">곧 시작하는 종목이 없습니다.</p>
+            {upcomingIpos.length === 0 ? (
+              <p className="text-gray-500 col-span-2">곧 시작하는 종목이 없습니다.</p>
             ) : (
               upcomingIpos.map((subscription) => (
                 <SubscriptionCard key={subscription.id} subscription={subscription} />
