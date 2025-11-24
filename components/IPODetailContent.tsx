@@ -10,22 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, AlertCircle, XCircle, Building, Calendar, TrendingUp, FileText, ExternalLink, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import Script from 'next/script';
-
-
-type FirebaseIPO = {
-    stockName: string;
-    schedule: string;
-    price: string;
-    minDeposit: string;
-    competitionRate: string;
-    retailCompetition?: string;
-    recommendState: string;
-    underwriter: string;
-    reason?: string;
-    category?: string;
-    lockupRate?: string;
-    listingDate?: string;
-}
+import { FirebaseIPO } from '@/components/HomeContent' 
 
 const brokersLinks: Record<string, string> = {
     '토스증권': 'https://tossinvest.com',
