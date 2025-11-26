@@ -10,11 +10,14 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Sparkles, Calendar, Users, TrendingUp, Building, AlertCircle, CheckCircle, XCircle, BookOpen, ChevronRight, RefreshCw } from 'lucide-react'
+import { Sparkles, Calendar, Users, TrendingUp, Building, AlertCircle, CheckCircle, XCircle, BookOpen, ChevronRight, RefreshCw, LogOut, MessageCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 // 👇 아까 만든 캐시 도구 가져오기 (파일이 있어야 합니다!)
 import { storage } from '@/utils/storage'
+
+// ⭐ 로그인 기능 가져오기
+import { useSession, signIn, signOut } from "next-auth/react"
 
 // 3. (중요!) Java DB의 필드명 정의 (이거에 맞춰서 가져옴)
 export type FirebaseIPO = {
@@ -152,6 +155,9 @@ const getStatusFromRecommendState = (recommendState: string) => {
 // ---
 export default function HomeContent() {
     const router = useRouter()
+
+    // ⭐ 세션 정보 가져오기
+    const { data: session } = useSession()
 
     const [nowIpos, setNowIpos] = useState<Subscription[]>([])
     const [upcomingIpos, setUpcomingIpos] = useState<Subscription[]>([])
@@ -350,23 +356,67 @@ export default function HomeContent() {
     // 9. (수정!) JSX 렌더링 부분을 진짜 데이터 State로 변경
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
-
-                {/* 1. 헤더 */}
-                <header className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-balance">효도 청약</h1>
-                    {/* ⭐ [추가] 새로고침 버튼 (우측 상단 배치) */}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 text-gray-400 hover:text-blue-600"
-                        onClick={handleRefresh}
-                        title="최신 데이터로 새로고침"
+          
+          {/* ⭐ [수정] 상단 내비게이션 바 (헤더) ⭐ */}
+          <nav className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              
+              {/* 좌측: 로고 및 메뉴 */}
+              <div className="flex items-center gap-6">
+                <Link href="/" className="text-xl font-bold text-gray-900 tracking-tight hover:opacity-80">
+                  효도 청약
+                </Link>
+                {/* PC용 메뉴 */}
+                <div className="hidden md:flex gap-4 text-sm font-medium text-gray-600">
+                  <span className="text-blue-600 cursor-pointer">공모주</span>
+                  <Link href="/profit" className="hover:text-gray-900">수익 기록장</Link>
+                </div>
+              </div>
+    
+              {/* 우측: 기능 버튼 및 로그인 */}
+              <div className="flex items-center gap-2">
+                {/* 새로고침 */}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleRefresh}
+                  className="text-gray-400 hover:text-blue-600"
+                  title="새로고침"
+                >
+                  <RefreshCw className="h-5 w-5" />
+                </Button>
+    
+                {session ? (
+                  // 로그인 상태
+                  <div className="flex items-center gap-3 ml-2">
+                    <div className="text-right hidden sm:block">
+                      <p className="text-xs text-gray-500">반갑습니다</p>
+                      <p className="text-sm font-bold text-gray-800">{session.user?.name}님</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => signOut()}
+                      className="text-gray-500 hover:text-red-600 text-xs"
                     >
-                        <RefreshCw className="h-5 w-5" />
+                      로그아웃
                     </Button>
-                </header>
+                  </div>
+                ) : (
+                  // 비로그인 상태
+                  <Button 
+                    onClick={() => signIn('kakao')}
+                    className="bg-[#FEE500] text-black hover:bg-[#FEE500]/90 font-bold text-sm px-4 h-9 rounded-lg ml-2"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1.5 fill-black" /> 
+                    카카오 로그인
+                  </Button>
+                )}
+              </div>
+            </div>
+          </nav>
 
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
                 {/* ⭐ [추가] 로봇에게 보여줄 사이트 소개글 (SEO & 애드센스용) ⭐ */}
                 <section className="mb-8 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <h2 className="text-lg font-bold text-gray-800 mb-2">👵 효도 청약이란?</h2>
@@ -451,7 +501,7 @@ export default function HomeContent() {
                         )}
                     </div>
                 </section>
-            </div>
+          </div>
         </div>
     )
 }

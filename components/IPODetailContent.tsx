@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, AlertCircle, XCircle, Building, Calendar, TrendingUp, FileText, ExternalLink, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import Script from 'next/script';
-import { FirebaseIPO } from '@/components/HomeContent' 
+import { FirebaseIPO } from '@/components/HomeContent'
 
 const brokersLinks: Record<string, string> = {
     '토스증권': 'https://tossinvest.com',
@@ -53,17 +53,17 @@ export default function IPODetailContent({ id }: { id: string }) {
                     const RAW_CACHE_KEY = 'ipo_raw_cache';
                     const cachedRawList = storage.get<FirebaseIPO[]>(RAW_CACHE_KEY);
 
-          if (cachedRawList) {
-            // 캐시 리스트에서 현재 들어온 종목(targetName)을 찾음
-            const found = cachedRawList.find(item => item.stockName === targetName);
-            
-            if (found) {
-              console.log(`✅ 상세페이지(${targetName}): 캐시 데이터 사용 (비용 0원)`);
-              setData(found);
-              setIsLoading(false);
-              return; // 🚨 DB 요청 안 하고 여기서 끝냄!
-            }
-          }
+                    if (cachedRawList) {
+                        // 캐시 리스트에서 현재 들어온 종목(targetName)을 찾음
+                        const found = cachedRawList.find(item => item.stockName === targetName);
+
+                        if (found) {
+                            console.log(`✅ 상세페이지(${targetName}): 캐시 데이터 사용 (비용 0원)`);
+                            setData(found);
+                            setIsLoading(false);
+                            return; // 🚨 DB 요청 안 하고 여기서 끝냄!
+                        }
+                    }
 
                     // 2. 캐시에 없으면 어쩔 수 없이 DB 조회 (비용 발생)
                     console.log(`🔥 상세페이지(${targetName}): DB 조회 발생`);

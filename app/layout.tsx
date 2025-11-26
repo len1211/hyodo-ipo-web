@@ -3,7 +3,8 @@ import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import './globals.css'
-import Footer from '@/components/footer' 
+import Footer from '@/components/footer'
+import AuthProvider from '@/components/AuthProvider'
 
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
   },
   // 2. 검색 결과 설명 (제목 아래 작은 글씨)
   description: '복잡한 공모주, 신호등으로 쉽게 알려드립니다. 기관경쟁률, 의무보유확약, 상장일 매도 알림까지 한 번에 확인하세요.',
-  
+
   // 3. 검색 키워드 (네이버/구글 로봇용)
   keywords: ["공모주", "청약", "효도청약", "상장일", "공모주매도", "공모주일정", "비례배정", "균등배정"],
 
@@ -80,7 +81,7 @@ export default function RootLayout({
         <meta name="naver-site-verification" content="dd50cb6de3000b5feb2b795627ab179cc8ff8ac9" />
         {/* 구글 애드센스 계정 태그 */}
         <meta name="google-adsense-account" content="ca-pub-9693441631837902" />
-        
+
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
           integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
@@ -91,22 +92,22 @@ export default function RootLayout({
 
       {/* 👇 [수정] flex-col 클래스를 추가해서 푸터를 바닥에 고정시킵니다 */}
       <body className={`${inter.className} font-sans antialiased flex flex-col min-h-screen`}>
-        
-        {/* 👇 [수정] 메인 콘텐츠가 남은 공간을 꽉 채우도록 설정 (flex-grow) */}
-        <div className="flex-grow">
-          {children}
-        </div>
-        
-        <Analytics />
-        
-        {/* 👇 [추가] 푸터 컴포넌트 삽입 */}
-        <Footer /> 
+        <AuthProvider>
+          {/* 👇 [수정] 메인 콘텐츠가 남은 공간을 꽉 채우도록 설정 (flex-grow) */}
+          <div className="flex-grow">
+            {children}
+          </div>
 
-        {/* 👇 2. 구글 애널리틱스 (기존 유지) */}
-        <GoogleAnalytics gaId="G-KSMPQWSX14" />
-        
+          <Analytics />
+
+          {/* 👇 [추가] 푸터 컴포넌트 삽입 */}
+          <Footer />
+
+          {/* 👇 2. 구글 애널리틱스 (기존 유지) */}
+          <GoogleAnalytics gaId="G-KSMPQWSX14" />
 
 
+        </AuthProvider>
       </body>
     </html>
   )
