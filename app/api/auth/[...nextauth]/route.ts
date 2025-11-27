@@ -1,5 +1,7 @@
 import NextAuth from "next-auth"
 import KakaoProvider from "next-auth/providers/kakao"
+import { FirestoreAdapter } from "@next-auth/firebase-adapter"
+import { adminDb } from '@/app/firebase-admin'
 
 const handler = NextAuth({
   providers: [
@@ -7,30 +9,28 @@ const handler = NextAuth({
       clientId: process.env.KAKAO_CLIENT_ID!,
       clientSecret: process.env.KAKAO_CLIENT_SECRET!,
       authorization: {
-        params: {
-          // 이메일을 '요청'은 하되, 사용자가 거부하면 없는 채로 로그인됩니다.
-          scope: "profile_nickname profile_image account_email", 
-        },
+        params: { scope: "profile_nickname profile_image account_email" },
       },
     }),
   ],
+  
+  adapter: FirestoreAdapter(adminDb), 
+  
   callbacks: {
-    // 1. 로그인 성공 시 JWT 토큰 생성 (서버 저장소)
-    async jwt({ token, user, account }) {
+    // 1. JWT 토큰 생성 (Adapter가 User ID를 token에 저장)
+    async jwt({ token, user }) {
       if (user) {
-        // ⭐ [핵심] 변하지 않는 고유 ID 저장
+        // user.id(카카오 고유 ID)를 token의 고유 속성(id)에 저장합니다.
         token.id = user.id; 
-        token.provider = account?.provider;
       }
       return token;
     },
-    // 2. 프론트엔드에서 useSession으로 정보 달라고 할 때 (클라이언트 전달)
+    // 2. 세션 정보 생성/요청 시 (⭐ [핵심 수정]: 토큰 안정 검사)
     async session({ session, token }) {
-      if (session.user) {
-        // 세션 ID를 카카오 고유 ID로 덮어쓰기 (가장 중요!)
+      // 🚨 안전장치: token이 유효하고 token.id가 있을 때만 할당합니다.
+      if (session.user && token && token.id) { 
         (session.user as any).id = token.id as string;
-        // 이메일은 있으면 넣고, 없으면(사용자가 거부했으면) null
-        session.user.email = token.email;
+        session.user.email = token.email; 
       }
       return session;
     },

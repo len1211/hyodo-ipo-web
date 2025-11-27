@@ -23,6 +23,14 @@ export const viewport: Viewport = {
 
 // ⭐ 여기가 SEO 핵심 수정 부분입니다! ⭐
 export const metadata: Metadata = {
+  // 내 진짜 도메인을 기준 주소로 설정
+  metadataBase: new URL( 'https://hyodo-care.com'),
+
+  // "이 페이지의 진짜 주소는 hyodo-care.com 이야" 라고 구글에 신고하는 태그그
+  alternates: {
+    canonical: '/',
+  },
+
   // 1. 검색 결과 제목 (브라우저 탭 이름)
   title: {
     template: '%s | 효도 청약',
