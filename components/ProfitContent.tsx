@@ -118,7 +118,10 @@ export default function ProfitContent() {
     <div className="min-h-screen bg-gray-50 pb-24">
       <div className="w-full max-w-3xl mx-auto px-2 sm:px-4 pt-2 space-y-4">
         
-        <ProfitHeader userName={session?.user?.name || '사용자'} />
+        <ProfitHeader userName={
+          session?.user?.name || '사용자'}
+          monthlyAmount={monthlyAmount}
+          />
 
         <AssetCard 
           monthlyAmount={monthlyAmount} 

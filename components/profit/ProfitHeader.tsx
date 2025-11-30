@@ -1,38 +1,69 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Megaphone, Share2 } from 'lucide-react'
+import { Megaphone } from 'lucide-react'
 
-type Props = {
-  userName?: string; // 사용자 이름 (선택 사항: "이승환님의 수익 기록장" 처럼 쓸 경우 대비)
-  onShareClick?: () => void; // 부모 컴포넌트에서 클릭 이벤트 제어 가능
+// window 객체에 Kakao가 있다는 것을 타입스크립트에게 알림
+declare global {
+  interface Window {
+    Kakao: any;
+  }
 }
 
-export default function ProfitHeader({ userName, onShareClick }: Props) {
+type Props = {
+  userName?: string;
+  monthlyAmount: number; // 👈 추가된 Props
+}
+
+export default function ProfitHeader({ userName, monthlyAmount }: Props) {
   
-  // 기본 공유 핸들러 (부모에서 함수를 안 넘겨줬을 때 작동)
-  const handleDefaultShare = async () => {
-    // 1. 모바일 네이티브 공유하기 (Navigator Share API)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: '효도 청약 수익 인증',
-          text: '나 오늘 공모주로 치킨값 벌었다! 🍗 너도 한번 시작해봐.',
-          url: window.location.href,
-        });
-        return;
-      } catch (err) {
-        console.log('공유 취소됨');
+  // 1. 카카오 SDK 초기화
+  useEffect(() => {
+    // 스크립트가 로드되었는지 확인
+    if (window.Kakao) {
+      // 중복 초기화 방지
+      if (!window.Kakao.isInitialized()) {
+        // 👇 여기에 본인의 [JavaScript 키]를 넣으세요!
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '본인의_카카오_자바스크립트_키_입력'); 
       }
     }
-    
-    // 2. PC거나 공유 기능 미지원 시: 클립보드 복사 or 알림
-    alert("📢 친구들에게 수익을 자랑해보세요! (카카오톡 공유 기능 준비중)");
+  }, []);
+
+  // 2. 공유하기 핸들러
+  const handleShare = () => {
+    if (!window.Kakao || !window.Kakao.isInitialized()) {
+      alert("카카오톡 공유 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: `${userName}님의 수익 인증! 💰`,
+        description: `이번 달 공모주로 ${monthlyAmount.toLocaleString()}원 벌었어요! 
+치킨 ${Math.floor(monthlyAmount / 20000)}마리 먹을 수 있습니다. 🍗`,
+        imageUrl:
+          'https://hyodo-care.com/og-image.png', // 썸네일 이미지 URL (본인 앱 로고나 썸네일 URL로 교체 추천)
+        link: {
+          mobileWebUrl: window.location.href,
+          webUrl: window.location.href,
+        },
+      },
+      buttons: [
+        {
+          title: '구경하러 가기',
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href,
+          },
+        },
+      ],
+    });
   };
 
   return (
     <div className="flex justify-between items-center py-4 px-1">
-      {/* 왼쪽: 타이틀 영역 */}
       <div>
         <h1 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
           수익 기록장
@@ -40,23 +71,20 @@ export default function ProfitHeader({ userName, onShareClick }: Props) {
             효도청약
           </span>
         </h1>
-        {/* 서브 텍스트가 필요하면 주석 해제 */}
-        {/* <p className="text-xs text-gray-400 mt-1">티끌 모아 태산! 💰</p> */}
       </div>
 
-      {/* 오른쪽: 자랑하기 버튼 */}
       <Button 
-        onClick={onShareClick || handleDefaultShare}
+        onClick={handleShare}
         size="sm" 
         className="
-          bg-[#FFD700] hover:bg-[#FFC700] 
+          bg-[#FEE500] hover:bg-[#FEE500]/90 
           text-black font-bold text-xs 
           px-4 h-9 rounded-full shadow-md 
           transition-transform active:scale-95
           flex items-center gap-1.5
         "
       >
-        <Megaphone className="w-3.5 h-3.5" /> {/* 또는 Share2 아이콘 */}
+        <Megaphone className="w-3.5 h-3.5" />
         자랑하기
       </Button>
     </div>
