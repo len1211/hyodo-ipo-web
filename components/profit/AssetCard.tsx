@@ -6,30 +6,47 @@ import { CalendarDays, Pencil } from 'lucide-react'
 type Props = {
   monthlyAmount: number;
   totalAmount: number;
-  goalTitle: string;      // 👈 추가됨
-  goalAmount: number;     // 👈 추가됨
-  onEditGoal: () => void; // 👈 추가됨 (연필 누르면 실행될 함수)
+  goalTitle: string;
+  goalAmount: number;
+  onEditGoal: () => void;
+  // 👇 [추가] 시작점 데이터 (옵셔널, 기본값 0)
+  goalStartAmount?: number; 
 }
 
 export default function AssetCard({ 
-  monthlyAmount, totalAmount, goalTitle, goalAmount, onEditGoal 
+  monthlyAmount, 
+  totalAmount, 
+  goalTitle, 
+  goalAmount, 
+  onEditGoal,
+  goalStartAmount = 0 // 기본값 0원으로 설정
 }: Props) {
   
-  // 목표 금액이 0이면 나눗셈 에러 나니까 1로 처리
+  // 1. 목표 금액 안전장치 (0원 나누기 방지)
   const safeGoalAmount = goalAmount || 1;
-  const progressPercent = Math.min((totalAmount / safeGoalAmount) * 100, 100);
+
+  // 2. [핵심 로직 변경] 
+  // 현재 진행된 금액 = (현재 총 누적액 - 목표 설정 당시 누적액)
+  // Math.max(0, ...)을 써서 혹시라도 마이너스가 나오지 않게 방지
+  const currentProgress = Math.max(0, totalAmount - goalStartAmount);
+
+  // 3. 퍼센트 계산
+  const progressPercent = Math.min((currentProgress / safeGoalAmount) * 100, 100);
+
+  // 4. 남은 금액 계산
+  const remainingAmount = Math.max(0, safeGoalAmount - currentProgress);
 
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-1 text-blue-600 font-bold border-l-4 border-blue-600 pl-2 text-sm ml-1">
-        <span>|</span> 나의 자산 현황
+        나의 자산 현황
       </div>
 
       <Card className="border-none shadow-lg bg-white rounded-2xl overflow-hidden">
         <CardContent className="p-6 text-center space-y-6">
           
-          {/* ... (이번달 수익 부분은 기존 코드 유지) ... */}
-           <div>
+          {/* [A] 이번달 수익 */}
+          <div>
             <p className="text-xs text-gray-500 flex items-center justify-center gap-1 mb-2">
               <CalendarDays className="w-4 h-4" /> 이번 달 수익
             </p>
@@ -44,8 +61,8 @@ export default function AssetCard({
 
           <div className="h-px bg-gray-100 w-full"></div>
           
-          {/* ... (누적 수익 부분 기존 코드 유지) ... */}
-           <div className="grid grid-cols-2 gap-4">
+          {/* [B] 누적 수익 */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="text-center border-r border-gray-100">
               <p className="text-xs text-gray-400 mb-1">총 누적 수익</p>
               <h3 className="text-lg font-bold text-gray-800">+{totalAmount.toLocaleString()}원</h3>
@@ -58,12 +75,12 @@ export default function AssetCard({
             </div>
           </div>
 
-          {/* 👇 [목표 그래프 부분] */}
+          {/* [C] 목표 달성 그래프 (수정됨) */}
           <div className="bg-gray-50 p-4 rounded-xl">
             <div className="flex justify-between text-xs text-gray-600 mb-2 font-bold">
               {/* 목표 이름과 금액 표시 */}
               <span className="flex items-center gap-1 truncate max-w-[200px]">
-                🌴 {goalTitle || "목표를 설정해주세요"} ({goalAmount.toLocaleString()}원)
+                🌴 {goalTitle || "목표를 설정해주세요"} ({goalAmount > 0 ? goalAmount.toLocaleString() : 0}원)
               </span>
               
               {/* 연필 버튼 */}
@@ -75,15 +92,22 @@ export default function AssetCard({
             <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
               <div 
                 className="bg-blue-600 h-3 rounded-full transition-all duration-1000 ease-out" 
-                style={{ width: `${progressPercent}%` }}
+                // 목표금액이 0원이면 그래프 0% 처리
+                style={{ width: `${goalAmount > 0 ? progressPercent : 0}%` }}
               ></div>
             </div>
+            
             <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-blue-600 font-bold">{progressPercent.toFixed(1)}% 달성</p>
+              <p className="text-xs text-blue-600 font-bold">
+                {goalAmount > 0 ? progressPercent.toFixed(1) : 0}% 달성
+              </p>
+              
               <p className="text-[10px] text-gray-400">
-                {(goalAmount - totalAmount) > 0 
-                  ? `${(goalAmount - totalAmount).toLocaleString()}원 남음` 
-                  : "🎉 목표 달성!"}
+                {goalAmount > 0 
+                  ? (remainingAmount > 0 
+                      ? `${remainingAmount.toLocaleString()}원 남음` 
+                      : "🎉 목표 달성!")
+                  : "새 목표를 세워보세요!"}
               </p>
             </div>
           </div>

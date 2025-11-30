@@ -8,17 +8,21 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Trash2 } from 'lucide-react' // 👇 [추가] 쓰레기통 아이콘
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  userId: string;          // 누구의 목표를 수정할지 알아야 함
-  initialTitle: string;    // 기존 제목 (예: 제주도 여행)
-  initialAmount: number;   // 기존 금액
+  userId: string;          
+  initialTitle: string;    
+  initialAmount: number;   
+  // 👇 [추가] 현재까지 번 돈 (이걸 기준으로 0% 시작점을 잡음)
+  currentTotalAmount: number; 
 }
 
-export default function EditGoalModal({ isOpen, onClose, userId, initialTitle, initialAmount }: Props) {
+export default function EditGoalModal({ 
+  isOpen, onClose, userId, initialTitle, initialAmount, currentTotalAmount 
+}: Props) {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,32 +31,60 @@ export default function EditGoalModal({ isOpen, onClose, userId, initialTitle, i
   useEffect(() => {
     if (isOpen) {
       setTitle(initialTitle || '');
-      setAmount(String(initialAmount || 0));
+      // 0원일 때는 빈칸으로 보여주는 게 수정하기 편함
+      setAmount(initialAmount > 0 ? String(initialAmount) : '');
     }
   }, [isOpen, initialTitle, initialAmount]);
 
-  // 저장 버튼 눌렀을 때
+  // [저장] 버튼 눌렀을 때
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 디버깅 로그
     console.log("저장 시도 - UserId:", userId);
+    
     if (!userId) {
         alert("로그인 정보(ID)를 불러오지 못했습니다. 다시 로그인해주세요.");
         return;
     } 
+    
     setIsSubmitting(true);
 
     try {
-      // Firebase 'users' 컬렉션의 내 문서(userId)에 목표 정보 저장(덮어쓰기)
-      // { merge: true } 옵션은 기존 닉네임 등을 지우지 않고 목표만 업데이트함
       await setDoc(doc(db, 'users', userId), {
         goalTitle: title,
-        goalAmount: Number(amount)
+        goalAmount: Number(amount),
+        // 👇 [핵심] 목표를 설정하는 '지금 이 순간'의 총액을 시작점으로 기록함
+        // 이렇게 해야 "앞으로 버는 돈"부터 카운트가 됨 (0% 시작)
+        goalStartAmount: currentTotalAmount
       }, { merge: true });
       
-      onClose(); // 성공하면 창 닫기
+      onClose(); 
     } catch (error) {
       console.error(error);
       alert("저장에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 👇 [추가] [초기화] 버튼 눌렀을 때
+  const handleReset = async () => {
+    if (!confirm("정말 목표를 초기화하시겠습니까?")) return;
+    if (!userId) return;
+    
+    setIsSubmitting(true);
+    try {
+      // 모든 목표 관련 필드를 초기화
+      await setDoc(doc(db, 'users', userId), {
+        goalTitle: "",
+        goalAmount: 0,
+        goalStartAmount: 0 
+      }, { merge: true });
+
+      onClose();
+    } catch (error) {
+      alert("초기화 실패");
     } finally {
       setIsSubmitting(false);
     }
@@ -90,9 +122,28 @@ export default function EditGoalModal({ isOpen, onClose, userId, initialTitle, i
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-blue-600 h-14 text-lg font-bold rounded-xl" disabled={isSubmitting}>
-            {isSubmitting ? <Loader2 className="animate-spin" /> : "수정 완료"}
-          </Button>
+          {/* 👇 버튼 영역: [초기화] 와 [수정 완료] 로 나눔 */}
+          <div className="flex gap-3 pt-2">
+            <Button 
+              type="button" 
+              onClick={handleReset}
+              variant="outline"
+              className="flex-1 h-14 text-red-500 border-red-100 hover:bg-red-50 hover:text-red-600 font-bold rounded-xl"
+              disabled={isSubmitting}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              초기화
+            </Button>
+
+            <Button 
+              type="submit" 
+              className="flex-[2] bg-blue-600 hover:bg-blue-700 h-14 text-lg font-bold rounded-xl" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" /> : "수정 완료"}
+            </Button>
+          </div>
+
         </form>
       </DialogContent>
     </Dialog>

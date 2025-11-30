@@ -3,21 +3,21 @@
 import { useState } from 'react'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // 필요한 데이터 타입 정의
 type ProfitLog = {
   date: string; // YYYY-MM-DD
-  // 다른 필드는 달력 표시에 필요 없음
 }
 
 type Props = {
-  logs: ProfitLog[]; // 기록된 날짜를 확인하기 위해 필요
+  logs: any[]; // 기록된 날짜를 확인하기 위해 필요
+  // 👇 [추가] 부모 컴포넌트(ProfitContent)에서 내려주는 선택 상태와 함수
+  selectedDate: string | null;
+  onSelectDate: (date: string | null) => void;
 }
 
-export default function ProfitCalendar({ logs }: Props) {
-  // 달력의 현재 날짜 상태는 이 컴포넌트 내부에서만 관리합니다.
-  // (메인 페이지는 이 달력이 몇 월을 보여주는지 알 필요가 없기 때문입니다)
+export default function ProfitCalendar({ logs, selectedDate, onSelectDate }: Props) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // --- 날짜 이동 핸들러 ---
@@ -33,20 +33,33 @@ export default function ProfitCalendar({ logs }: Props) {
     setCurrentDate(new Date());
   };
 
+  // --- 👇 [추가] 날짜 클릭 핸들러 ---
+  const handleDateClick = (day: number) => {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
+    
+    // 클릭한 날짜 문자열 생성 (예: 2024-05-21)
+    const clickedDate = `${year}-${month}-${d}`;
+
+    // 이미 선택된 날짜를 또 누르면 선택 해제(null), 아니면 선택
+    if (selectedDate === clickedDate) {
+      onSelectDate(null);
+    } else {
+      onSelectDate(clickedDate);
+    }
+  };
+
   // --- 달력 생성 로직 ---
   const generateCalendar = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     
-    // 이번 달 1일의 요일 (0: 일요일, 1: 월요일 ...)
     const firstDay = new Date(year, month, 1).getDay();
-    // 이번 달 마지막 날짜
     const lastDay = new Date(year, month + 1, 0).getDate();
     
     const days = [];
-    // 1일 이전의 빈칸 채우기
     for(let i = 0; i < firstDay; i++) days.push(null);
-    // 1일부터 마지막 날까지 숫자 채우기
     for(let i = 1; i <= lastDay; i++) days.push(i);
     
     return days;
@@ -54,7 +67,6 @@ export default function ProfitCalendar({ logs }: Props) {
 
   // --- 기록 확인 로직 ---
   const hasRecord = (day: number) => {
-    // 비교를 위해 'YYYY-MM-DD' 포맷으로 변환
     const year = currentDate.getFullYear();
     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
@@ -79,7 +91,7 @@ export default function ProfitCalendar({ logs }: Props) {
       </div>
 
       <Card className="border-none shadow-md bg-white rounded-2xl overflow-hidden">
-        {/* 달력 헤더 (년월 이동) */}
+        {/* 달력 헤더 */}
         <CardHeader className="pb-2 pt-4 px-4">
           <div className="flex justify-between items-center">
             <h3 className="font-bold text-lg text-gray-800 flex items-center gap-1">
@@ -113,46 +125,57 @@ export default function ProfitCalendar({ logs }: Props) {
 
         {/* 달력 그리드 */}
         <CardContent className="px-4 pb-6">
-          {/* 요일 헤더 */}
           <div className="grid grid-cols-7 text-center text-xs text-gray-400 mb-2 font-medium">
             <span className="text-red-400">일</span>
             <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span>
             <span className="text-blue-400">토</span>
           </div>
 
-          {/* 날짜 셀 */}
           <div className="grid grid-cols-7 gap-1 text-sm">
-            {generateCalendar().map((day, i) => (
-              <div 
-                key={i} 
-                className={`
-                  aspect-square flex flex-col items-center justify-center rounded-lg relative
-                  ${day ? 'hover:bg-gray-50' : ''}
-                `}
-              >
-                {day && (
-                  <>
-                    <span className={`
-                      z-10 w-7 h-7 flex items-center justify-center rounded-full text-sm
-                      ${isToday(day) 
-                        ? 'bg-gray-900 text-white font-bold shadow-md' // 오늘은 검은색 원
-                        : (i % 7 === 0 ? 'text-red-500' : (i % 7 === 6 ? 'text-blue-500' : 'text-gray-700')) // 일/토요일 색상
-                      }
-                    `}>
-                      {day}
-                    </span>
-                    
-                    {/* 수익 기록이 있는 날 빨간 점 표시 */}
-                    {hasRecord(day) && (
-                      <span className="absolute bottom-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+            {generateCalendar().map((day, i) => {
+               // 현재 렌더링 중인 날짜 문자열 생성 (비교용)
+               const year = currentDate.getFullYear();
+               const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+               const d = day ? String(day).padStart(2, '0') : '';
+               const thisDateStr = `${year}-${month}-${d}`;
+               
+               // 👇 [추가] 이 날짜가 선택된 날짜인지 확인
+               const isSelected = day && selectedDate === thisDateStr;
+
+               return (
+                  <div 
+                    key={i} 
+                    // 👇 [추가] 클릭 이벤트 연결 (숫자가 있을 때만)
+                    onClick={() => day && handleDateClick(day)}
+                    className={`
+                      aspect-square flex flex-col items-center justify-center rounded-lg relative
+                      ${day ? 'hover:bg-gray-50 cursor-pointer active:scale-95 transition-transform' : ''}
+                      ${isSelected ? 'bg-blue-50 ring-2 ring-blue-500 z-0' : ''} 
+                    `}
+                  >
+                    {day && (
+                      <>
+                        <span className={`
+                          z-10 w-7 h-7 flex items-center justify-center rounded-full text-sm
+                          ${isToday(day) 
+                            ? 'bg-gray-900 text-white font-bold shadow-md' // 오늘
+                            : (isSelected ? 'text-blue-700 font-bold' : (i % 7 === 0 ? 'text-red-500' : (i % 7 === 6 ? 'text-blue-500' : 'text-gray-700'))) // 선택됨 or 평일
+                          }
+                        `}>
+                          {day}
+                        </span>
+                        
+                        {/* 수익 기록이 있는 날 빨간 점 표시 */}
+                        {hasRecord(day) && (
+                          <span className="absolute bottom-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+                        )}
+                      </>
                     )}
-                  </>
-                )}
-              </div>
-            ))}
+                  </div>
+               )
+            })}
           </div>
 
-          {/* 범례 */}
           <div className="mt-4 flex justify-center gap-4 text-[10px] text-gray-400">
              <span className="flex items-center gap-1">
                <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> 수익 기록
