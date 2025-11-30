@@ -8,29 +8,33 @@ const handler = NextAuth({
     KakaoProvider({
       clientId: process.env.KAKAO_CLIENT_ID!,
       clientSecret: process.env.KAKAO_CLIENT_SECRET!,
-      authorization: {
-        params: { scope: "profile_nickname profile_image account_email" },
-      },
     }),
   ],
   
+  // 1. 어댑터 연결 (이게 있어야 로그인 시 DB에 users 컬렉션이 자동 생성됨)
   adapter: FirestoreAdapter(adminDb), 
   
+  // 2. ⭐ [핵심] 전략을 'jwt'로 강제 설정 (이러면 세션 문서를 안 만듭니다)
+  session: {
+    strategy: 'jwt',
+  },
+
   callbacks: {
-    // 1. JWT 토큰 생성 (Adapter가 User ID를 token에 저장)
+    // 3. JWT 생성 시 실행 (로그인 직후 1번만 실행됨)
+    // 어댑터가 있어도 strategy가 jwt면 이 콜백이 실행됩니다.
     async jwt({ token, user }) {
+      // 로그인 초기에는 user 객체가 있습니다. (DB에 저장된 ID)
       if (user) {
-        // user.id(카카오 고유 ID)를 token의 고유 속성(id)에 저장합니다.
         token.id = user.id; 
       }
       return token;
     },
-    // 2. 세션 정보 생성/요청 시 (⭐ [핵심 수정]: 토큰 안정 검사)
+
+    // 4. 클라이언트에서 useSession() 부를 때 실행
+    // JWT 방식이므로 여기서는 'user' 대신 'token'을 씁니다.
     async session({ session, token }) {
-      // 🚨 안전장치: token이 유효하고 token.id가 있을 때만 할당합니다.
-      if (session.user && token && token.id) { 
+      if (session.user && token && token.id) {
         (session.user as any).id = token.id as string;
-        session.user.email = token.email; 
       }
       return session;
     },
