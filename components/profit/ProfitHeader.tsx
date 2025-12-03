@@ -46,16 +46,18 @@ export default function ProfitHeader({ userName, monthlyAmount }: Props) {
         imageUrl:
           'https://hyodo-care.com/og-image.png', // 썸네일 이미지 URL (본인 앱 로고나 썸네일 URL로 교체 추천)
         link: {
-          mobileWebUrl: window.location.href,
-          webUrl: window.location.href,
+          // mobileWebUrl: window.location.href,
+          // webUrl: window.location.href,
+          mobileWebUrl: 'https://hyodo-care.com',
+          webUrl: 'https://hyodo-care.com',
         },
       },
       buttons: [
         {
           title: '구경하러 가기',
           link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href,
+            mobileWebUrl: 'https://hyodo-care.com',
+            webUrl: 'https://hyodo-care.com',
           },
         },
       ],
