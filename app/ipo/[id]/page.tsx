@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../../firebase' // Firebase 설정 파일 경로 확인
+import { db } from '@/app/firebase' // Firebase 설정 파일 경로 확인
 import IPODetailContent from '@/components/IPODetailContent' // 아까 만든 알맹이 컴포넌트
 
 type Props = {
@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const stockName = decodeURIComponent(params.id);
   
   // 2. 기본값 설정 (데이터가 없을 경우 대비)
-  let title = `${stockName} 청약 정보 | 효도 청약`;
-  let description = '공모주 청약 정보 및 신호등 분석 결과를 확인하세요.';
+  let title = `${stockName} 청약 정보 및 경쟁률 | 효도 청약`;
+  let description = '신호등 분석으로 알아보는 공모주 필수 정보. 기관경쟁률, 의무보유확약, 상장일 정보를 확인하세요.';
 
   try {
     // 3. Firebase에서 해당 종목 데이터 미리 가져오기
@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       // 4. 데이터를 이용해 매력적인 설명 문구 만들기
       // 예: "[🟢 강력 추천] 에임드바이오 - 기관경쟁률 1500:1, 확약률 30%"
       const signal = data.recommendState ? `[${data.recommendState.split(' ')[0]}]` : ''; // 🟢, 🟡, 🔴 만 추출
+      title = `${stockName} 청약 할까? 경쟁률 ${data.competitionRate} 확인하기`;
       description = `${signal} 경쟁률 ${data.competitionRate}, 확약률 ${data.lockupRate}. ${data.reason ? data.reason.substring(0, 60) + "..." : ""}`;
     }
   } catch (e) {
@@ -38,6 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: title,
     description: description,
+    keywords: [stockName, "공모주", "청약", "상장일", "경쟁률", "효도청약"],
+    alternates: {
+      canonical: `/ipo/${encodeURIComponent(stockName)}`,
+    },
     openGraph: {
       title: `${stockName} 청약 할까 말까? (신호등 분석)`, // 카톡 공유 시 굵은 제목
       description: description, // 카톡 공유 시 작은 설명

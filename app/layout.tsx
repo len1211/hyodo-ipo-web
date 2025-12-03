@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://hyodo-care.com'),
   alternates: {
     canonical: '/',
+    types: {
+      'application/rss+xml': '/rss.xml',
+    },
   },
   title: {
     template: '%s | 효도 청약',

@@ -17,7 +17,7 @@ type Props = {
 }
 
 export default function ProfitHeader({ userName, monthlyAmount }: Props) {
-  
+
   // 1. 카카오 SDK 초기화
   useEffect(() => {
     // 스크립트가 로드되었는지 확인
@@ -25,7 +25,7 @@ export default function ProfitHeader({ userName, monthlyAmount }: Props) {
       // 중복 초기화 방지
       if (!window.Kakao.isInitialized()) {
         // 👇 여기에 본인의 [JavaScript 키]를 넣으세요!
-        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '본인의_카카오_자바스크립트_키_입력'); 
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '본인의_카카오_자바스크립트_키_입력');
       }
     }
   }, []);
@@ -73,9 +73,9 @@ export default function ProfitHeader({ userName, monthlyAmount }: Props) {
         </h1>
       </div>
 
-      <Button 
+      <Button
         onClick={handleShare}
-        size="sm" 
+        size="sm"
         className="
           bg-[#FEE500] hover:bg-[#FEE500]/90 
           text-black font-bold text-xs 

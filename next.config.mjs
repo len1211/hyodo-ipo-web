@@ -3,6 +3,8 @@ import withPWA from "@ducanh2912/next-pwa";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // capacitor andorid ios 쓸때 쓰는 output 속성 => 빌드 할떄 html을 미리 만들어줌.
+  // output: 'export',
   images: {
     unoptimized: true,
   },

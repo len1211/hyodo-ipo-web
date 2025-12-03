@@ -5,10 +5,13 @@ import GuideContent from '@/components/GuideContent' // 👈 아까 만든 알�
 export const metadata: Metadata = {
   title: '노인도 쉬운 공모주 청약 방법 및 균등배정 꿀팁', // 브라우저 탭에 "공모주 투자 가이드 | 효도 청약" 으로 뜸
   description: '초보자도 3분이면 이해하는 공모주 투자 필승 전략과 필수 용어 정리. 비례배정, 균등배정, 따상, 증거금 계산법을 쉽게 알려드립니다.',
+  alternates: {
+    canonical: '/guide', // 검색엔진에게 "이 페이지의 진짜 주소는 여기야"라고 알려줌
+  },
   openGraph: {
     title: '공모주 투자 가이드 - 실패 없는 투자의 시작',
     description: '초보자도 3분이면 이해하는 공모주 투자 필승 전략! 지금 바로 확인하세요.',
-    url: 'https://hyodo-care.com/guide',
+    url: '/guide',
     siteName: '효도 청약',
     images: [
       {
