@@ -1,166 +1,25 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../app/firebase"; // 경로 주의 (../app/firebase)
-import { storage } from '@/utils/storage'
+import { useState } from 'react'
+import Link from 'next/link'
+import Script from 'next/script'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { CheckCircle, AlertCircle, XCircle, Building, Calendar, TrendingUp, FileText, ExternalLink, Share2 } from 'lucide-react'
-import Link from 'next/link'
-import Script from 'next/script';
-import { FirebaseIPO } from '@/components/HomeContent'
+import { Building, Calendar, TrendingUp, FileText, ExternalLink } from 'lucide-react'
 
-const brokersLinks: Record<string, string> = {
-    '토스증권': 'https://tossinvest.com',
-    '카카오페이증권': 'https://kakaopay.com',
-    'KB증권': 'https://m.kbsec.com',
-    '미래에셋증권': 'https://securities.miraeasset.com/mobile/index.jsp',
-    '삼성증권': 'https://www.samsungpop.com',
-    '한국투자증권': 'https://www.truefriend.com/main/main.jsp',
-    'NH투자증권': 'https://m.namuh.com',
-    '키움증권': 'https://www.kiwoom.com/h/main',
-    '신한투자증권': 'https://www.shinhansec.com',
-    '하나증권': 'https://www.hanaw.com',
-    '대신증권': 'https://www.daishin.com',
-    '유안타증권': 'https://www.myasset.com',
-    '한화투자증권': 'https://www.hanwhawm.com',
-    '신영증권': 'https://www.shinyoung.com',
-    '현대차증권': 'https://www.hmsec.com',
-    '하이투자증권': 'https://www.hi-ib.com',
-    'DB금융투자': 'https://www.db-fi.com',
-    'IBK투자증권': 'https://www.ibks.com',
-    '유진투자증권': 'https://www.eugenefn.com',
-    '교보증권': 'https://www.iprovest.com',
-    'LS증권': 'https://www.ls-sec.co.kr',
-}
+// ♻️ 분리한 파일들 import
+import { useIpoDetail } from '@/hooks/useIpoDetail'
+import { brokersLinks, getStatusConfig } from '@/utils/ipo-detail-helpers'
 
-// 👇 props로 id(종목명)를 받습니다.
 export default function IPODetailContent({ id }: { id: string }) {
-
-    const [data, setData] = useState<FirebaseIPO | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    // const params = useParams(); // 껍데기에서 id를 주므로 이건 필요 없음
-
-    useEffect(() => {
-        if (id) {
-            const fetchDoc = async () => {
-                try {
-                    const targetName = decodeURIComponent(id);
-
-                    // ⭐ [캐싱 로직 추가] 1. 캐시 먼저 확인하기 ⭐
-                    const RAW_CACHE_KEY = 'ipo_raw_cache';
-                    const cachedRawList = storage.get<FirebaseIPO[]>(RAW_CACHE_KEY);
-
-                    if (cachedRawList) {
-                        // 캐시 리스트에서 현재 들어온 종목(targetName)을 찾음
-                        const found = cachedRawList.find(item => item.stockName === targetName);
-
-                        if (found) {
-                            console.log(`✅ 상세페이지(${targetName}): 캐시 데이터 사용 (비용 0원)`);
-                            setData(found);
-                            setIsLoading(false);
-                            return; // 🚨 DB 요청 안 하고 여기서 끝냄!
-                        }
-                    }
-
-                    // 2. 캐시에 없으면 어쩔 수 없이 DB 조회 (비용 발생)
-                    console.log(`🔥 상세페이지(${targetName}): DB 조회 발생`);
-                    const docRef = doc(db, "ipo_list", targetName);
-                    const docSnap = await getDoc(docRef);
-
-                    if (docSnap.exists()) {
-                        setData(docSnap.data() as FirebaseIPO);
-                    } else {
-                        console.error("No such document!");
-                    }
-                } catch (error) {
-                    console.error("Error fetching document:", error);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            fetchDoc();
-        }
-    }, [id]);
-
+    // 1. 훅 사용 (데이터 로딩 로직 끝!)
+    const { data, isLoading } = useIpoDetail(id);
+    
+    // 카카오 SDK 로드 상태
     const [kakaoSdkLoaded, setKakaoSdkLoaded] = useState(false);
 
-    const shareKakao = () => {
-        if (!data) return;
-        if (window.Kakao && kakaoSdkLoaded) {
-            window.Kakao.Share.sendDefault({
-                objectType: "feed",
-                content: {
-                    title: `[효도 청약] ${data.stockName} 청약 정보`,
-                    description: data.reason ? data.reason.substring(0, 50) + "..." : "경쟁률과 확약률을 확인하세요!",
-                    imageUrl: "https://hyodo-care.com/og-image.png",
-                    link: {
-                        mobileWebUrl: window.location.href,
-                        webUrl: window.location.href,
-                    },
-                },
-                buttons: [
-                    {
-                        title: "정보 보러가기",
-                        link: {
-                            mobileWebUrl: window.location.href,
-                            webUrl: window.location.href,
-                        },
-                    },
-                ],
-            });
-        } else {
-            alert("공유 기능을 준비 중입니다. 잠시만 기다려주세요.");
-        }
-    };
-
-    const getStatusConfig = (recommendState: string = "") => {
-        // 1. 빨간불 먼저 검사
-        if (recommendState.includes("패스") || recommendState.includes("비추천") || recommendState.includes("마세요")) {
-            return {
-                icon: XCircle,
-                color: 'text-red-600',
-                badgeBg: 'bg-red-100',
-                badgeText: 'text-red-800',
-                badgeBorder: 'border-red-300',
-                statusText: '청약 비추천'
-            }
-        }
-        // 2. 초록불 검사
-        if (recommendState.includes("추천") || recommendState.includes("강력")) {
-            return {
-                icon: CheckCircle,
-                color: 'text-green-600',
-                badgeBg: 'bg-green-100',
-                badgeText: 'text-green-800',
-                badgeBorder: 'border-green-300',
-                statusText: '적극 추천'
-            }
-        }
-        // 3. 노란불 검사
-        if (recommendState.includes("보통") || recommendState.includes("신중")) {
-            return {
-                icon: AlertCircle,
-                color: 'text-orange-500',
-                badgeBg: 'bg-orange-100',
-                badgeText: 'text-orange-800',
-                badgeBorder: 'border-orange-300',
-                statusText: '신중하게'
-            }
-        }
-        // 4. 기본값
-        return {
-            icon: AlertCircle,
-            color: 'text-gray-500',
-            badgeBg: 'bg-gray-100',
-            badgeText: 'text-gray-800',
-            badgeBorder: 'border-gray-300',
-            statusText: '아직 모름'
-        }
-    }
-
+    // 2. 로딩 화면 처리
     if (isLoading || !data) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -171,6 +30,7 @@ export default function IPODetailContent({ id }: { id: string }) {
         );
     }
 
+    // 3. UI 설정값 가져오기 (헬퍼 함수 사용)
     const statusConfig = getStatusConfig(data.recommendState);
     const StatusIcon = statusConfig.icon;
     const underwriters = data.underwriter ? data.underwriter.split(',').map(s => s.trim()) : ['정보 없음'];
@@ -195,6 +55,7 @@ export default function IPODetailContent({ id }: { id: string }) {
                     <h1 className="text-xl sm:text-2xl font-bold">{data.stockName}</h1>
                 </div>
 
+                {/* 핵심 분석 카드 (신호등) */}
                 <Card className="mb-4 sm:mb-6 border-2">
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex flex-col items-center text-center gap-3">
@@ -205,9 +66,9 @@ export default function IPODetailContent({ id }: { id: string }) {
                             <div className="mt-2">
                                 <p className="text-sm font-semibold text-gray-800 mb-2">
                                     {statusConfig.statusText === '적극 추천' ? '이러한 이유로 추천합니다' :
-                                        statusConfig.statusText === '신중하게' ? '이러한 이유로 신중하게 판단하세요' :
-                                            statusConfig.statusText === '청약 비추천' ? '이러한 이유로 추천하지 않습니다' :
-                                                '아래 정보를 확인하세요'}
+                                     statusConfig.statusText === '신중하게' ? '이러한 이유로 신중하게 판단하세요' :
+                                     statusConfig.statusText === '청약 비추천' ? '이러한 이유로 추천하지 않습니다' :
+                                     '아래 정보를 확인하세요'}
                                 </p>
                                 <p className="text-sm sm:text-base leading-relaxed text-gray-700">
                                     {data.reason || `기관 경쟁률 ${data.competitionRate || '미정'}. ${data.underwriter || ''} 주관.`}
@@ -319,21 +180,6 @@ export default function IPODetailContent({ id }: { id: string }) {
                         </div>
                     </CardContent>
                 </Card>
-
-                {/* 카카오톡 공유 버튼
-        <div className="mt-6 flex justify-center">
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="w-full max-w-xs text-base py-6 bg-yellow-300 text-black hover:bg-yellow-400 font-bold border-yellow-400"
-            onClick={shareKakao}
-            disabled={!kakaoSdkLoaded}
-          >
-            <Share2 className="mr-2 h-5 w-5" />
-            카톡으로 공유하기
-          </Button>
-        </div> */}
-
             </div>
         </div>
     )
