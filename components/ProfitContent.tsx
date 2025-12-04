@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useSession, signIn } from 'next-auth/react'
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@/app/firebase'
-import { MessageCircle, TrendingUp, Calendar, Trophy } from 'lucide-react'
+// Loader2 아이콘은 없으면 빼셔도 되지만, 로딩 표시에 좋습니다. (lucide-react에 기본 포함)
+import { MessageCircle, TrendingUp, Calendar, Trophy, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 import ProfitHeader from '@/components/profit/ProfitHeader'
@@ -34,11 +35,14 @@ export default function ProfitContent() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // 1. 목표 데이터 관리 State
-  const [goalTitle, setGoalTitle] = useState(''); // 제목도 기본값 빈칸으로
-  const [goalAmount, setGoalAmount] = useState(0); // 👈 [수정 1] 기본값 0원으로 변경
+  const [goalTitle, setGoalTitle] = useState(''); 
+  const [goalAmount, setGoalAmount] = useState(0);
   const [goalStartAmount, setGoalStartAmount] = useState(0); 
   const [isEditGoalOpen, setIsEditGoalOpen] = useState(false); 
   
+  // ⭐ [수정 1] 로그인 로딩 상태 추가
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+
   // 2. 수익 데이터 실시간 조회
   useEffect(() => {
     if (userId) {
@@ -82,7 +86,6 @@ export default function ProfitContent() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           
-          // 👇 [수정 2] 값이 있으면(0 포함) 업데이트
           if (data.goalTitle !== undefined) setGoalTitle(data.goalTitle);
           if (data.goalAmount !== undefined) setGoalAmount(Number(data.goalAmount));
           if (data.goalStartAmount !== undefined) setGoalStartAmount(Number(data.goalStartAmount));
@@ -101,7 +104,19 @@ export default function ProfitContent() {
     }
   };
 
-  // ⭐ [핵심 수정] 비로그인(봇)에게 보여줄 '소개 화면' (애드센스용 콘텐츠)
+  // ⭐ [수정 2] 로그인 핸들러 함수 추가
+  // 버튼 클릭 시 즉시 로딩 상태로 만들고, callbackUrl을 명시합니다.
+  const handleKakaoLogin = async () => {
+    try {
+      setIsLoginLoading(true); // 로딩 시작 (버튼 비활성화)
+      await signIn('kakao', { callbackUrl: window.location.href }); 
+    } catch (error) {
+      console.error("Login failed:", error);
+      setIsLoginLoading(false); // 실패 시 로딩 해제
+    }
+  };
+
+  // 비로그인(봇/게스트)에게 보여줄 '소개 화면'
   if (!session) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-50">
@@ -119,7 +134,7 @@ export default function ProfitContent() {
             흩어져 있는 수익 내역, 이제 한곳에서 관리하세요.
           </p>
 
-          {/* 2. 기능 소개 (애드센스가 좋아하는 텍스트 콘텐츠) */}
+          {/* 2. 기능 소개 */}
           <div className="space-y-4 mb-8 text-left">
             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
               <TrendingUp className="w-5 h-5 text-blue-500 mt-0.5" />
@@ -137,13 +152,29 @@ export default function ProfitContent() {
             </div>
           </div>
 
-          {/* 3. 로그인 버튼 (CTA) */}
+          {/* 3. 로그인 버튼 (CTA) - ⭐ [수정 3] 로딩 상태 적용 */}
           <Button 
-            onClick={() => signIn('kakao')} 
-            className="w-full bg-[#FEE500] text-black hover:bg-[#FEE500]/90 font-bold py-6 px-4 text-base rounded-xl shadow-md transition-transform active:scale-95"
+            onClick={handleKakaoLogin} 
+            disabled={isLoginLoading} // 로딩 중 클릭 방지
+            className={`w-full font-bold py-6 px-4 text-base rounded-xl shadow-md transition-all active:scale-95 ${
+                isLoginLoading 
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed" // 로딩 중 스타일
+                  : "bg-[#FEE500] text-black hover:bg-[#FEE500]/90" // 평소 스타일
+            }`}
           >
-            <MessageCircle className="w-5 h-5 mr-2" /> 
-            카카오로 3초 만에 시작하기
+            {isLoginLoading ? (
+                // 로딩 중일 때 보여줄 UI
+                <div className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>카카오로 이동 중...</span>
+                </div>
+            ) : (
+                // 평소 UI
+                <>
+                    <MessageCircle className="w-5 h-5 mr-2" /> 
+                    카카오로 3초 만에 시작하기
+                </>
+            )}
           </Button>
           
           <p className="mt-4 text-xs text-gray-400">
@@ -153,19 +184,6 @@ export default function ProfitContent() {
       </div>
     );
   }
-
-  // if (!session) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-50">
-  //       <div className="text-center">
-  //         <h2 className="text-2xl font-bold mb-4">로그인이 필요합니다</h2>
-  //         <Button onClick={() => signIn('kakao')} className="bg-[#FEE500] text-black hover:bg-[#FEE500]/90 font-bold py-6 px-8 text-lg rounded-xl shadow-md">
-  //           <MessageCircle className="w-5 h-5 mr-2" /> 카카오 로그인
-  //         </Button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
