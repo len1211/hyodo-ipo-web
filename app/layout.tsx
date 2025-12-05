@@ -12,6 +12,8 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import Header from '@/components/Header'
 import BottomNav from '@/components/BottomNav'
 
+import NextTopLoader from 'nextjs-toploader'; // ⭐ 추가
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
@@ -83,8 +85,22 @@ export default function RootLayout({
       </head>
 
       <body className={`${inter.className} font-sans antialiased flex flex-col min-h-screen bg-gray-50`}>
+
+        <NextTopLoader
+          color="#2563eb"   // 파란색 (Tailwind blue-600 색상). 원하시는 색으로 변경 가능
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false} // 우측 상단 뺑글이 제거 (깔끔하게 바만 나옴)
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #2563eb,0 0 5px #2563eb"
+        />
+
+
         <AuthProvider>
-          
+
           {/* 1. 전역 헤더 (PC/모바일 모두 상단 고정) */}
           <Header />
 
@@ -100,7 +116,7 @@ export default function RootLayout({
           <BottomNav />
 
           <Analytics />
-          
+
           {/* 푸터는 PC에서만 보이거나, 모바일에서는 맨 밑으로 밀림 */}
           <Footer />
 

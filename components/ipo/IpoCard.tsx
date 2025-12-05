@@ -1,16 +1,18 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { Subscription } from '@/types/ipo'
 import { 
-  Building, Calendar, Users, TrendingUp, 
-  CheckCircle, AlertCircle, XCircle 
+    Building, Calendar, Users, TrendingUp, 
+    CheckCircle, AlertCircle, XCircle,
+    Loader2 
 } from 'lucide-react'
 
-// UI 헬퍼 함수 (컴포넌트 내부 사용)
+// UI 헬퍼 함수
 const getStatusIcon = (status: Subscription['status']) => {
     switch (status) {
         case 'recommended': return <CheckCircle className="h-12 w-12 text-green-600" strokeWidth={3} />
@@ -33,6 +35,24 @@ interface IpoCardProps {
 
 export default function IpoCard({ subscription }: IpoCardProps) {
     const router = useRouter()
+    
+    // ⭐ 1. 로딩 상태 관리
+    const [isLoading, setIsLoading] = useState(false);
+
+    // ⭐ 2. 클릭 핸들러 (UI 렌더링 우선순위 조정)
+    const handleDetailClick = (e: React.MouseEvent) => {
+        // 부모 요소 클릭 간섭 방지
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 로딩 상태 먼저 켜기 (화면 갱신 요청)
+        setIsLoading(true);
+
+        // ⭐ 핵심: 0초 지연을 주어 브라우저가 스피너를 먼저 그리게 만듭니다.
+        setTimeout(() => {
+            router.push(`/ipo/${encodeURIComponent(subscription.name)}`);
+        }, 0);
+    };
 
     return (
         <Card className="relative overflow-hidden hover:shadow-lg transition-shadow">
@@ -84,12 +104,21 @@ export default function IpoCard({ subscription }: IpoCardProps) {
                     {subscription.description}
                 </p>
 
+                {/* ⭐ 3. 버튼: 로딩 상태 반영 및 핸들러 연결 */}
                 <Button
                     className="w-full text-base py-5 sm:py-6 font-semibold"
                     size="lg"
-                    onClick={() => router.push(`/ipo/${encodeURIComponent(subscription.name)}`)}
+                    onClick={handleDetailClick}
+                    disabled={isLoading}
                 >
-                    자세히 보기
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            상세 정보 불러오는 중...
+                        </>
+                    ) : (
+                        "자세히 보기"
+                    )}
                 </Button>
             </CardContent>
         </Card>
