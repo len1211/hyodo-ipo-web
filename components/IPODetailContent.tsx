@@ -9,26 +9,22 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Building, Calendar, TrendingUp, FileText, ExternalLink } from 'lucide-react'
 
 // ♻️ 분리한 파일들 import
-import { useIpoDetail } from '@/hooks/useIpoDetail'
 import { brokersLinks, getStatusConfig } from '@/utils/ipo-detail-helpers'
 
-export default function IPODetailContent({ id }: { id: string }) {
-    // 1. 훅 사용 (데이터 로딩 로직 끝!)
-    const { data, isLoading } = useIpoDetail(id);
+export default function IPODetailContent({ id, initialData }: { id: string, initialData: any }) {
+    
+    // ✅ props로 받은 데이터 바로 사용
+    const data = initialData;
+
+    // 데이터 없을 때 처리
+    if (!data) {
+        return <div className="p-10 text-center">데이터가 없습니다.</div>
+     }
     
     // 카카오 SDK 로드 상태
     const [kakaoSdkLoaded, setKakaoSdkLoaded] = useState(false);
 
-    // 2. 로딩 화면 처리
-    if (isLoading || !data) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-gray-50">
-                <p className="text-2xl font-semibold text-gray-700 animate-pulse">
-                    데이터를 불러오는 중입니다... 🚀
-                </p>
-            </div>
-        );
-    }
+    
 
     // 3. UI 설정값 가져오기 (헬퍼 함수 사용)
     const statusConfig = getStatusConfig(data.recommendState);
