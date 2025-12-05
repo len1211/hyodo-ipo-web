@@ -58,6 +58,12 @@ export default async function Page({ params }: Props) {
   // React cache 덕분에 위에서 부른 데이터(generateMetadata)를 그대로 씁니다. (비용 0, 속도 Fast)
   const data = await getIpoData(params.id);
 
+  // ✅ 데이터가 없으면 404 페이지로 보내버리기 (여기서 null 체크를 하므로 아래에는 데이터가 확실히 있음)
+  if (!data) {
+    return <div>데이터가 없습니다.</div> // 혹은 직접 메시지 띄우기
+    // notFound(); 
+  }
+
   // ✅ Client Component에 데이터를 'initialData'로 넘겨줍니다.
   return <IPODetailContent id={params.id} initialData={data} />
 }

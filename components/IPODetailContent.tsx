@@ -14,7 +14,7 @@ import { brokersLinks, getStatusConfig } from '@/utils/ipo-detail-helpers'
 import { FirebaseIPO } from '@/types/ipo'
 
 // ⭐ [수정 2] props에서 'any' 대신 'FirebaseIPO' 사용
-export default function IPODetailContent({ id, initialData }: { id: string, initialData: FirebaseIPO }) {
+export default function IPODetailContent({ id, initialData }: { id: string, initialData: FirebaseIPO | null }) {
     
     // ✅ props로 받은 데이터 바로 사용
     const data = initialData;
