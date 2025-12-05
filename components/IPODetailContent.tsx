@@ -10,8 +10,11 @@ import { Building, Calendar, TrendingUp, FileText, ExternalLink } from 'lucide-r
 
 // ♻️ 분리한 파일들 import
 import { brokersLinks, getStatusConfig } from '@/utils/ipo-detail-helpers'
+// ⭐ [수정 1] 아까 만든 타입 가져오기
+import { FirebaseIPO } from '@/types/ipo'
 
-export default function IPODetailContent({ id, initialData }: { id: string, initialData: any }) {
+// ⭐ [수정 2] props에서 'any' 대신 'FirebaseIPO' 사용
+export default function IPODetailContent({ id, initialData }: { id: string, initialData: FirebaseIPO }) {
     
     // ✅ props로 받은 데이터 바로 사용
     const data = initialData;
@@ -19,12 +22,10 @@ export default function IPODetailContent({ id, initialData }: { id: string, init
     // 데이터 없을 때 처리
     if (!data) {
         return <div className="p-10 text-center">데이터가 없습니다.</div>
-     }
+    }
     
     // 카카오 SDK 로드 상태
     const [kakaoSdkLoaded, setKakaoSdkLoaded] = useState(false);
-
-    
 
     // 3. UI 설정값 가져오기 (헬퍼 함수 사용)
     const statusConfig = getStatusConfig(data.recommendState);
@@ -162,7 +163,9 @@ export default function IPODetailContent({ id, initialData }: { id: string, init
                                 <div key={index} className="bg-white border-2 border-gray-300 rounded-lg p-3 sm:p-4 flex items-center justify-between hover:border-blue-400 transition-colors">
                                     <span className="font-semibold text-sm sm:text-base">{underwriter}</span>
                                     <Link
-                                        href={brokersLinks[underwriter] || `https://www.google.com/search?q=${underwriter}+앱`}
+                                        // ⭐ [수정 3] 빨간줄 핵심 원인 해결!
+                                        // brokersLinks 객체에 underwriter라는 키가 있는지 확실치 않아 생기는 에러를 방지합니다.
+                                        href={(brokersLinks as any)[underwriter] || `https://www.google.com/search?q=${underwriter}+앱`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
