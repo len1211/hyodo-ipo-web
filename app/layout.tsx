@@ -3,13 +3,14 @@ import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import './globals.css'
-import Footer from '@/components/Footer'
+
 import AuthProvider from '@/components/AuthProvider'
 
 import { GoogleAnalytics } from '@next/third-parties/google'
 
 // 👇 [수정] 헤더와 바텀네비게이션 임포트
 import Header from '@/components/Header'
+import Footer from '@/components/footer'
 import BottomNav from '@/components/BottomNav'
 
 import NextTopLoader from 'nextjs-toploader'; // ⭐ 추가

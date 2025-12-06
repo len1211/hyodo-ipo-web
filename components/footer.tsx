@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 mt-auto pb-12">
+    <footer className="bg-gray-50 border-t border-gray-200 mt-auto pb-12 md:pb-0">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between lg:px-8 gap-4">
         
         {/* 저작권 및 책임 고지 (모바일에서는 아래쪽, PC에서는 왼쪽) */}
