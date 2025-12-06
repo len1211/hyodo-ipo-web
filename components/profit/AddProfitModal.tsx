@@ -14,11 +14,13 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Plus, Loader2 } from 'lucide-react'
+import { RECENT_IPO_STOCKS } from '@/constants/stocks';
 
 type Props = {
   userId: string; // 저장을 위해 유저 ID가 꼭 필요함
   onSuccess?: () => void; // 저장 성공 후 부모 컴포넌트에서 할 일(선택)
 }
+
 
 export default function AddProfitModal({ userId, onSuccess }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -117,13 +119,38 @@ export default function AddProfitModal({ userId, onSuccess }: Props) {
               <label className="text-xs font-bold text-gray-500 mb-1.5 block ml-1">종목명</label>
               <Input 
                 type="text" 
-                placeholder="예: 삼성전자, 배당금, 은행이자" 
+                placeholder="예: 더본코리아, 교보스팩19호" 
                 value={stockName} 
                 onChange={(e) => setStockName(e.target.value)} 
                 required 
                 className="text-lg py-6 bg-gray-50 border-gray-200 focus:bg-white placeholder:text-gray-300" 
               />
             </div>
+
+            
+
+            {/* 2. 입력창 바로 아래에 '칩' 배치 */}
+      <div className="mb-3 flex flex-wrap gap-2">
+        {RECENT_IPO_STOCKS.map((name) => (
+          <button
+            key={name}
+            type="button" // 폼 제출 방지
+            onClick={() => setStockName(name)} // 클릭 시 입력창에 자동 입력
+            className="rounded-full border border-gray-300 bg-gray-50 px-3 py-1 text-xs text-gray-600 transition hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+          >
+            {name}
+          </button>
+        ))}
+      </div>
+
+      
+
+
+
+
+
+
+
 
             {/* 수익금 입력 (가장 중요) */}
             <div>
