@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace "com.hyodocare.app"
     compileSdk rootProject.ext.compileSdkVersion
@@ -16,8 +22,29 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
+
+    // ⭐ [추가] 서명 설정
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+            // storeFile file("my-release-key.keystore") // 아까 만든 파일명
+            // storePassword "설정한비밀번호"
+            // keyAlias "my-key-alias" // 아까 설정한 alias (명령어 그대로 쳤으면 my-key-alias)
+            // keyPassword "설정한비밀번호"
+        }
+    }
+
     buildTypes {
         release {
+            // ⭐ [수정] 위에서 만든 서명 설정을 적용
+            signingConfig signingConfigs.release
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

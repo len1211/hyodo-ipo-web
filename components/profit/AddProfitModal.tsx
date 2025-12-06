@@ -117,7 +117,7 @@ export default function AddProfitModal({ userId, onSuccess }: Props) {
               <label className="text-xs font-bold text-gray-500 mb-1.5 block ml-1">종목명</label>
               <Input 
                 type="text" 
-                placeholder="예: 삼성전자, LG에너지솔루션" 
+                placeholder="예: 삼성전자, 배당금, 은행이자" 
                 value={stockName} 
                 onChange={(e) => setStockName(e.target.value)} 
                 required 

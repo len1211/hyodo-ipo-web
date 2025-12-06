@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import './globals.css'
-import Footer from '@/components/footer'
+import Footer from '@/components/Footer'
 import AuthProvider from '@/components/AuthProvider'
 
 import { GoogleAnalytics } from '@next/third-parties/google'
@@ -13,6 +13,7 @@ import Header from '@/components/Header'
 import BottomNav from '@/components/BottomNav'
 
 import NextTopLoader from 'nextjs-toploader'; // ⭐ 추가
+import FloatingCta from '@/components/common/FloatingCta'; // 경로 확인 필요
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -77,6 +78,13 @@ export default function RootLayout({
         <meta name="naver-site-verification" content="dd50cb6de3000b5feb2b795627ab179cc8ff8ac9" />
         <meta name="google-adsense-account" content="ca-pub-9693441631837902" />
         <Script
+          id="google-adsense"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9693441631837902" // 🔴 본인의 애드센스 클라이언트 ID 입력 필수
+          crossOrigin="anonymous"
+          strategy="lazyOnload" // 페이지 로드 속도 저하 방지 (중요)
+        />
+        <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
           integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
           crossOrigin="anonymous"
@@ -97,6 +105,8 @@ export default function RootLayout({
           speed={200}
           shadow="0 0 10px #2563eb,0 0 5px #2563eb"
         />
+
+        
 
 
         <AuthProvider>
@@ -123,6 +133,9 @@ export default function RootLayout({
           <GoogleAnalytics gaId="G-KSMPQWSX14" />
 
         </AuthProvider>
+
+        {/* 플로팅 버튼 (모바일 뷰포트 하단 고정) */}
+        <FloatingCta />
       </body>
     </html>
   )

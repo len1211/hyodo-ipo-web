@@ -35,8 +35,8 @@ export default function HomeContent() {
                     <h2 className="text-lg font-bold text-gray-800 mb-2">👵 효도 청약이란?</h2>
                     <p className="text-sm text-gray-600 leading-relaxed">
                         복잡하고 어려운 공모주 청약, 이제 <strong>'신호등'</strong> 하나로 해결하세요.<br />
-                        기관 경쟁률, 의무보유 확약률 등 어려운 지표를 분석하여
-                        <strong>초록불(추천)</strong>, <strong>주황불(신중)</strong>, <strong>빨간불(패스)</strong>로 알기 쉽게 보여드립니다.<br />
+                        기관 경쟁률, 의무보유 확약률 등 어려운 지표를 분석하여 
+                         <strong>초록불(추천)</strong>, <strong>주황불(신중)</strong>, <strong>빨간불(패스)</strong>로 알기 쉽게 보여드립니다.<br />
                         부모님을 위한 가장 쉬운 공모주 비서, 지금 바로 확인해보세요.
                     </p>
                 </section>
