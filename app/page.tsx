@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
 import HomeContent from '@/components/HomeContent' // 👈 방금 만든 알맹이 불러오기
+import WelcomeToast from '@/components/WelcomeToast'; // 경로 확인
+import { Suspense } from 'react'; // 상단에 추가
 
 // ⭐ 메인 페이지 전용 SEO 설정 ⭐
 export const metadata: Metadata = {
@@ -29,5 +31,12 @@ export const metadata: Metadata = {
 
 // ⭐ 실제 화면은 HomeContent(클라이언트 컴포넌트)가 그립니다.
 export default function HomePage() {
-  return <HomeContent />
+  return (
+    <>
+      <HomeContent />
+      {/* <Suspense fallback={null}> 👈 데이터 읽는 동안 잠깐 기다려주는 역할 */}
+        <WelcomeToast />
+      {/* </Suspense> */}
+    </>
+  )
 }

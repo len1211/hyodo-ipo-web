@@ -9,13 +9,13 @@ type Props = {
 };
 
 export default function KakaoShareButton({ stockName, profit }: Props) {
-  
+
   // 1. 카카오 SDK 초기화
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Kakao) {
       if (!window.Kakao.isInitialized()) {
         // 👇 아까 복사한 본인의 JavaScript 키를 여기에 넣으세요!
-        window.Kakao.init('YOUR_JAVASCRIPT_KEY_HERE'); 
+        window.Kakao.init('YOUR_JAVASCRIPT_KEY_HERE');
       }
     }
   }, []);
@@ -25,7 +25,7 @@ export default function KakaoShareButton({ stockName, profit }: Props) {
     if (!window.Kakao) return;
 
     const chickenCount = Math.floor(profit / 20000); // 치킨 계산 로직 재사용
-    const description = chickenCount > 0 
+    const description = chickenCount > 0
       ? `🍗 치킨 ${chickenCount}마리 벌었어요! 효도청약 덕분이네요.`
       : `☕ 커피값 ${profit.toLocaleString()}원 벌었어요! 소소한 행복 ^^`;
 
@@ -37,16 +37,16 @@ export default function KakaoShareButton({ stockName, profit }: Props) {
         imageUrl:
           'https://hyodo-care.com/og-image.png', // 대표 이미지 URL (변경 필요)
         link: {
-          mobileWebUrl: 'https://hyodo-care.com',
-          webUrl: 'https://hyodo-care.com',
+          mobileWebUrl: `https://hyodo-care.com?utm_source=kakao_share&stock=${encodeURIComponent(stockName)}&profit=${profit}`,
+          webUrl: `https://hyodo-care.com?utm_source=kakao_share&stock=${encodeURIComponent(stockName)}&profit=${profit}`,
         },
       },
       buttons: [
         {
           title: '부모님 수익 구경가기',
           link: {
-            mobileWebUrl: 'https://hyodo-care.com',
-            webUrl: 'https://hyodo-care.com',
+            mobileWebUrl: `https://hyodo-care.com?utm_source=kakao_share&stock=${encodeURIComponent(stockName)}&profit=${profit}`,
+            webUrl: `https://hyodo-care.com?utm_source=kakao_share&stock=${encodeURIComponent(stockName)}&profit=${profit}`,
           },
         },
       ],
