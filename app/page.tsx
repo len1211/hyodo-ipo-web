@@ -34,9 +34,9 @@ export default function HomePage() {
   return (
     <>
       <HomeContent />
-      {/* <Suspense fallback={null}> 👈 데이터 읽는 동안 잠깐 기다려주는 역할 */}
+      <Suspense fallback={null}> 👈 데이터 읽는 동안 잠깐 기다려주는 역할
         <WelcomeToast />
-      {/* </Suspense> */}
+      </Suspense>
     </>
   )
 }

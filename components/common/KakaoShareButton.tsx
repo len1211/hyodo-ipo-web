@@ -43,7 +43,7 @@ export default function KakaoShareButton({ stockName, profit }: Props) {
       },
       buttons: [
         {
-          title: '부모님 수익 구경가기',
+          title: '수익 인증 구경가기',
           link: {
             mobileWebUrl: `https://hyodo-care.com?utm_source=kakao_share&stock=${encodeURIComponent(stockName)}&profit=${profit}`,
             webUrl: `https://hyodo-care.com?utm_source=kakao_share&stock=${encodeURIComponent(stockName)}&profit=${profit}`,

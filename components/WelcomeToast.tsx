@@ -43,23 +43,23 @@ export default function WelcomeToast() {
         {/* 내용 */}
         <div className="p-6 text-center">
           <h3 className="mb-2 text-xl font-bold text-gray-900">
-            가족분의 수익 소식!
+            💌 수익 인증이 도착했어요!
           </h3>
           <p className="mb-6 text-gray-600">
-            어머니/아버지께서 <br/>
+            공유해주신 분께서 <br/>
             <span className="font-bold text-blue-600">{data.stock}</span> 공모주로<br/>
-            <span className="text-lg font-bold text-red-500">+{data.profit.toLocaleString()}원</span>을 버셨어요!
+            <span className="text-lg font-bold text-red-500">+{data.profit.toLocaleString()}원</span> 수익을 냈습니다.
           </p>
 
           <button
             onClick={() => setIsVisible(false)}
             className="w-full rounded-xl bg-blue-600 py-3.5 font-bold text-white transition hover:bg-blue-700"
           >
-            축하 전화 드리기 📞
+            축하해 주고 나도 시작하기 🎉
           </button>
           
           <p className="mt-4 text-xs text-gray-400">
-            나도 효도청약 시작해보기 (무료)
+            누구나 쉽게 하는 공모주 테크 '효도청약'
           </p>
         </div>
       </div>
