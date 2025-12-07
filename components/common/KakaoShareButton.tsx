@@ -15,7 +15,7 @@ export default function KakaoShareButton({ stockName, profit }: Props) {
     if (typeof window !== 'undefined' && window.Kakao) {
       if (!window.Kakao.isInitialized()) {
         // 👇 아까 복사한 본인의 JavaScript 키를 여기에 넣으세요!
-        window.Kakao.init('YOUR_JAVASCRIPT_KEY_HERE');
+        window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '본인의_카카오_자바스크립트_키_입력');
       }
     }
   }, []);
