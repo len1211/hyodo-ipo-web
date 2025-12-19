@@ -17,7 +17,7 @@ export const useIpoData = () => {
                 const CACHE_KEY = 'ipo_home_data';
                 const RAW_CACHE_KEY = 'ipo_raw_cache';
 
-                // 1. 캐시 확인 (있으면 바로 리턴)
+                // 1. 캐시 확인
                 const cachedHome = storage.get<{ now: Subscription[], upcoming: Subscription[] }>(CACHE_KEY);
                 if (cachedHome) {
                     console.log("✅ 메인페이지: 캐시 데이터 사용");
@@ -40,30 +40,45 @@ export const useIpoData = () => {
 
                 snapshot.docs.forEach((doc) => {
                     const data = doc.data() as FirebaseIPO
-                    rawDataList.push(data); // 상세 페이지용 원본 저장
+                    rawDataList.push(data);
+
+                    if (!data.schedule) return;
+
+                    // 💡 [수정 포인트 1] 날짜 파싱 보정 (연도 누락 해결)
+                    const [startPart, endPart] = data.schedule.split('~');
+                    const year = startPart.split('.')[0]; // "2025" 추출
+                    
+                    // 종료일에 연도가 없으면(예: 12.19) 시작일의 연도를 붙여줌
+                    const fullEndDate = endPart?.includes('.') && endPart.split('.')[0].length === 4 
+                        ? endPart 
+                        : `${year}.${endPart || startPart}`;
 
                     const statusInfo = getStatusFromRecommendState(data.recommendState)
+                    
                     const ipo: Subscription = {
                         id: doc.id,
                         name: data.stockName,
                         category: data.category || data.underwriter?.split(',')[0] || '정보 없음',
                         status: statusInfo.status,
                         statusText: statusInfo.text,
-                        startDate: data.schedule?.split('~')[0] || '미정',
-                        endDate: data.schedule?.split('~')[1] || data.schedule?.split('~')[0] || '미정',
+                        // 💡 [수정 포인트 2] .을 -로 변환하여 브라우저 호환성 확보
+                        startDate: startPart.trim().replace(/\./g, '-'),
+                        endDate: fullEndDate.trim().replace(/\./g, '-'),
                         competitionRatio: data.competitionRate || '-',
                         price: data.price ? `${data.price.replace(' (예정)', '')}원` : '미정',
                         description: data.reason || `기관 경쟁률 ${data.competitionRate || '미정'}. ${data.underwriter || ''} 주관.`,
                     }
 
-                    if (!data.schedule) return;
-
-                    const { status, startDate } = getIpoStatus(data.schedule)
+                    // 💡 [수정 포인트 3] 상태 판별 함수 호출
+                    const { status } = getIpoStatus(data.schedule)
+                    
                     if (status === 'now') {
                         ipo.badge = '지금 청약 가능'
                         nowList.push(ipo)
                     } else if (status === 'upcoming') {
-                        if (startDate <= twoWeeksFromNow) {
+                        // 문자열 비교 대신 날짜 객체로 정확히 비교
+                        const ipoStartDate = new Date(ipo.startDate);
+                        if (ipoStartDate <= twoWeeksFromNow) {
                             ipo.badge = '곧 시작'
                             upcomingList.push(ipo)
                         }
@@ -78,7 +93,7 @@ export const useIpoData = () => {
 
                 // 3. 캐시 저장
                 storage.set(CACHE_KEY, { now: sortedNow, upcoming: sortedUpcoming });
-                storage.set(RAW_CACHE_KEY, rawDataList); // 상세 페이지를 위한 원본 저장
+                storage.set(RAW_CACHE_KEY, rawDataList);
 
             } catch (error) {
                 console.error('Failed to load IPO list:', error)

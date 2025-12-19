@@ -45,7 +45,7 @@ export default function PrivacyContent() {
                                         <strong>회원가입 및 식별:</strong> 카카오 간편 로그인을 통해 제공받는 <span className="underline decoration-blue-200 decoration-2">회원 식별자(ID), 닉네임, 프로필 사진</span>을 수집합니다. (비밀번호, 주민등록번호 등 민감정보는 절대 수집하지 않습니다.)
                                     </li>
                                     <li>
-                                        <strong>서비스 이용 기록:</strong> 이용자가 직접 입력한 <span className="underline decoration-blue-200 decoration-2">공모주 수익 내역(종목명, 금액, 날짜)</span>과 <span className="underline decoration-blue-200 decoration-2">가족/지인 연결 정보(초대자 ID)</span>를 데이터베이스(Firebase)에 저장하여 관리 기능을 제공합니다.
+                                        <strong>서비스 이용 기록:</strong> 이용자가 직접 입력한 <span className="underline decoration-blue-200 decoration-2">공모주 수익 내역(종목명, 금액, 날짜)</span>과 <span className="underline decoration-blue-200 decoration-2">가족/지인 연결 정보(초대자 ID)</span>를 데이터베이스에 저장하여 관리 기능을 제공합니다.
                                     </li>
                                     <li>
                                         <strong>자동 수집:</strong> 서비스 안정성 및 통계 분석(Google Analytics)을 위해 접속 로그, 쿠키(Cookie), 접속 IP 정보 등이 자동 수집될 수 있습니다.
